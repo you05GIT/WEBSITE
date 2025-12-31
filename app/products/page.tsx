@@ -13,6 +13,7 @@ interface Category {
   name_ar: string
   name_fr: string | null
   image_url: string | null
+  slug: string
 }
 
 interface Product {
@@ -95,16 +96,12 @@ export default function ProductsPage() {
               </li>
               {categories.map(category => (
                 <li key={category.id}>
-                  <button
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`w-full text-right px-4 py-2 rounded-lg transition-colors ${
-                      selectedCategory === category.id
-                        ? 'bg-primary text-white'
-                        : 'hover:bg-gray-100'
-                    }`}
+                  <Link
+                    href={`/category/${category.slug}`}
+                    className="block w-full text-right px-4 py-2 rounded-lg transition-colors hover:bg-gray-100"
                   >
                     {getTranslatedName(category, language)}
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>
