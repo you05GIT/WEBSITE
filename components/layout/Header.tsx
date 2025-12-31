@@ -8,10 +8,13 @@ import { useCartStore } from '@/store/cart'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Header() {
   const { settings, loadSettings } = useStoreSettings()
   const { items, loadCart } = useCartStore()
+  const { t } = useLanguage()
   const router = useRouter()
 
   useEffect(() => {
@@ -60,24 +63,26 @@ export default function Header() {
               href="/" 
               className="text-gray-700 hover:text-primary transition-colors"
             >
-              الرئيسية
+              {t('nav.home', 'الرئيسية')}
             </Link>
             <Link 
               href="/products" 
               className="text-gray-700 hover:text-primary transition-colors"
             >
-              المنتجات
+              {t('nav.products', 'المنتجات')}
             </Link>
             <Link 
               href="/orders" 
               className="text-gray-700 hover:text-primary transition-colors"
             >
-              طلباتي
+              {t('nav.my_orders', 'طلباتي')}
             </Link>
           </nav>
 
-          {/* Cart and Auth */}
+          {/* Cart, Language Switcher and Auth */}
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
+            
             <Link
               href="/cart"
               className="relative p-2 text-gray-700 hover:text-primary transition-colors"
@@ -102,19 +107,19 @@ export default function Header() {
             href="/" 
             className="text-gray-700 hover:text-primary transition-colors text-sm"
           >
-            الرئيسية
+            {t('nav.home', 'الرئيسية')}
           </Link>
           <Link 
             href="/products" 
             className="text-gray-700 hover:text-primary transition-colors text-sm"
           >
-            المنتجات
+            {t('nav.products', 'المنتجات')}
           </Link>
           <Link 
             href="/orders" 
             className="text-gray-700 hover:text-primary transition-colors text-sm"
           >
-            طلباتي
+            {t('nav.my_orders', 'طلباتي')}
           </Link>
         </nav>
       </div>
@@ -124,6 +129,7 @@ export default function Header() {
 
 function AuthButton() {
   const router = useRouter()
+  const { t } = useLanguage()
 
   const handleAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -143,7 +149,7 @@ function AuthButton() {
       onClick={handleAuth}
       className="text-sm bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors"
     >
-      حسابي
+      {t('nav.account', 'حسابي')}
     </button>
   )
 }
