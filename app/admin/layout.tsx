@@ -1,19 +1,27 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
+  // Skip auth check for login page
+  const isLoginPage = pathname === '/admin/login'
+
   useEffect(() => {
-    checkAdmin()
-  }, [])
+    if (!isLoginPage) {
+      checkAdmin()
+    } else {
+      setLoading(false)
+    }
+  }, [isLoginPage])
 
   const checkAdmin = async () => {
     const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -56,6 +64,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/admin/login')
+  }
+
+  // Render login page without admin layout
+  if (isLoginPage) {
+    return <>{children}</>
   }
 
   if (loading) {
