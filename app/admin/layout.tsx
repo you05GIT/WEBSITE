@@ -21,8 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     } else {
       setLoading(false)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoginPage])
+  }, [isLoginPage, pathname])
 
   const checkAdmin = async () => {
     const { data: { user }, error: userError } = await supabase.auth.getUser()

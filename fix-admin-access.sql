@@ -15,9 +15,6 @@ BEGIN
   VALUES (NEW.id, 'customer')
   ON CONFLICT (id) DO NOTHING;
   
-  -- Log for audit purposes (optional, comment out if not needed)
-  -- RAISE NOTICE 'Created user_profile for user: %', NEW.id;
-  
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -31,8 +28,7 @@ CREATE TRIGGER on_auth_user_created
 -- ============================================
 -- HELPER: Set a user as admin
 -- Usage: SELECT set_user_as_admin('user-email@example.com');
--- SECURITY: This function should only be accessible to authenticated users
---           In production, consider restricting via RLS or database roles
+-- SECURITY: This function is restricted to prevent unauthorized access
 -- ============================================
 CREATE OR REPLACE FUNCTION public.set_user_as_admin(user_email TEXT)
 RETURNS void AS $$
@@ -61,10 +57,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Grant execute permission only to authenticated users
--- Uncomment in production and adjust as needed:
--- REVOKE EXECUTE ON FUNCTION public.set_user_as_admin(TEXT) FROM PUBLIC;
--- GRANT EXECUTE ON FUNCTION public.set_user_as_admin(TEXT) TO authenticated;
+-- Restrict function access for security
+-- Only database owners/admins should be able to promote users to admin
+REVOKE EXECUTE ON FUNCTION public.set_user_as_admin(TEXT) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.set_user_as_admin(TEXT) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.set_user_as_admin(TEXT) FROM authenticated;
+
+-- Note: To use this function, run it as the database owner through Supabase SQL Editor
+-- or grant execute permission to specific trusted roles only
 
 -- ============================================
 -- Example usage (uncomment and update email):
