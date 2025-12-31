@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'crypto'
+import { v4 as uuidv4 } from 'uuid'
 
 const CART_SESSION_KEY = 'cart_session_id'
 
@@ -19,3 +19,4 @@ export function clearCartSessionId(): void {
   if (typeof window === 'undefined') return
   localStorage.removeItem(CART_SESSION_KEY)
 }
+
