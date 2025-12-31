@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 
 const CART_SESSION_KEY = 'cart_session_id'
 
@@ -8,7 +8,7 @@ export function getCartSessionId(): string {
   let sessionId = localStorage.getItem(CART_SESSION_KEY)
   
   if (!sessionId) {
-    sessionId = uuidv4()
+    sessionId = randomUUID()
     localStorage.setItem(CART_SESSION_KEY, sessionId)
   }
   
