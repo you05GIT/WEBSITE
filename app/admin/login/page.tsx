@@ -23,8 +23,6 @@ export default function AdminLoginPage() {
 
       if (error) throw error
 
-      console.log('Admin login - user authenticated:', data.user.id)
-
       // Check if user is admin
       const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
@@ -32,11 +30,8 @@ export default function AdminLoginPage() {
         .eq('id', data.user.id)
         .single()
 
-      console.log('Admin login - profile check:', { profile, profileError })
-
       if (profileError) {
         await supabase.auth.signOut()
-        console.error('Profile error:', profileError)
         throw new Error('لم يتم العثور على ملف تعريف المستخدم. يرجى الاتصال بمسؤول النظام.')
       }
 
@@ -45,11 +40,9 @@ export default function AdminLoginPage() {
         throw new Error('غير مصرح لك بالدخول - حساب المشرف فقط')
       }
 
-      console.log('Admin login - access granted')
       toast.success('تم تسجيل الدخول بنجاح')
       router.push('/admin')
     } catch (error: any) {
-      console.error('Admin login error:', error)
       toast.error(error.message || 'فشل تسجيل الدخول')
     } finally {
       setLoading(false)

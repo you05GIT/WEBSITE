@@ -26,10 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const checkAdmin = async () => {
     const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-    console.log('AdminLayout - checking auth:', { user: user?.id, userError })
-
     if (userError || !user) {
-      console.log('AdminLayout - no user, redirecting to login')
       router.push('/admin/login')
       return
     }
@@ -40,23 +37,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       .eq('id', user.id)
       .single()
 
-    console.log('AdminLayout - profile check:', { profile, profileError })
-
     if (profileError) {
-      console.error('AdminLayout - profile error:', profileError)
       toast.error('خطأ في التحقق من صلاحيات المستخدم')
       router.push('/admin/login')
       return
     }
 
     if (!profile || profile.role !== 'admin') {
-      console.log('AdminLayout - not admin, redirecting')
       toast.error('غير مصرح لك بالدخول')
       router.push('/')
       return
     }
 
-    console.log('AdminLayout - admin access granted')
     setIsAdmin(true)
     setLoading(false)
   }
