@@ -77,10 +77,7 @@ export default function CategoryPage() {
         setProducts(productsData)
       }
 
-      trackAnalyticsEvent('page_view', {
-        categoryId: categoryData.id,
-        categoryName: categoryData.name_ar,
-      })
+      trackAnalyticsEvent('page_view')
     } catch (error) {
       console.error('Error loading category:', error)
       setNotFound(true)

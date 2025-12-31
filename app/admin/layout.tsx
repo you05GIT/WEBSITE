@@ -90,6 +90,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link href="/admin/products" className="text-gray-700 hover:text-primary">
                 المنتجات
               </Link>
+              <Link href="/admin/categories" className="text-gray-700 hover:text-primary">
+                الفئات
+              </Link>
               <Link href="/admin/orders" className="text-gray-700 hover:text-primary">
                 الطلبات
               </Link>
