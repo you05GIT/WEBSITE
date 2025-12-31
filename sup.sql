@@ -346,6 +346,20 @@ INSERT INTO site_translations (key, language_code, value, category) VALUES
 ON CONFLICT (key, language_code) DO NOTHING;
 
 -- ============================================
+-- SAMPLE HOME PAGE TRANSLATIONS
+-- ============================================
+
+-- Insert French home page content (sample)
+INSERT INTO home_page_translations (language_code, hero_title, hero_subtitle, hero_description, cta_text) VALUES
+  ('fr', 'Bienvenue dans Notre Magasin de Gros', 'Nous vendons des accessoires pour téléphones en gros', 'Nous sommes spécialisés dans la vente de tous types d''accessoires pour téléphones à des prix de gros dans toutes les wilayas d''Algérie', 'Acheter Maintenant')
+ON CONFLICT (language_code) DO NOTHING;
+
+-- Insert Arabic home page content (fallback from existing)
+INSERT INTO home_page_translations (language_code, hero_title, hero_subtitle, hero_description, cta_text) VALUES
+  ('ar', 'مرحبا بكم في متجر الجملة', 'نبيع إكسسوارات الهواتف بالجملة', 'نحن متخصصون في بيع جميع أنواع إكسسوارات الهواتف بأسعار الجملة في جميع ولايات الجزائر', 'تسوق الآن')
+ON CONFLICT (language_code) DO NOTHING;
+
+-- ============================================
 -- HELPER VIEWS
 -- ============================================
 
