@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import Image from 'next/image'
 import { trackAnalyticsEvent } from '@/lib/analytics'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { getTranslatedName } from '@/hooks/useTranslations'
 
 interface Category {
   id: string
@@ -30,6 +32,7 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const { language, t } = useLanguage()
 
   useEffect(() => {
     loadCategories()
@@ -70,13 +73,13 @@ export default function ProductsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-8">المنتجات</h1>
+      <h1 className="text-4xl font-bold mb-8">{t('nav.products', 'المنتجات')}</h1>
 
       <div className="flex gap-8">
         {/* Sidebar - Categories */}
         <aside className="w-64 flex-shrink-0">
           <div className="bg-white rounded-lg shadow-md p-4 sticky top-20">
-            <h2 className="text-xl font-bold mb-4">الفئات</h2>
+            <h2 className="text-xl font-bold mb-4">{t('product.categories', 'الفئات')}</h2>
             <ul className="space-y-2">
               <li>
                 <button
@@ -87,7 +90,7 @@ export default function ProductsPage() {
                       : 'hover:bg-gray-100'
                   }`}
                 >
-                  جميع المنتجات
+                  {t('product.all_products', 'جميع المنتجات')}
                 </button>
               </li>
               {categories.map(category => (
@@ -100,7 +103,7 @@ export default function ProductsPage() {
                         : 'hover:bg-gray-100'
                     }`}
                   >
-                    {category.name_ar}
+                    {getTranslatedName(category, language)}
                   </button>
                 </li>
               ))}
@@ -116,7 +119,7 @@ export default function ProductsPage() {
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">لا توجد منتجات في هذه الفئة</p>
+              <p className="text-gray-500 text-lg">{t('message.no_products', 'لا توجد منتجات في هذه الفئة')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -132,11 +135,15 @@ export default function ProductsPage() {
 }
 
 function ProductCard({ product }: { product: Product }) {
+  const { language, t } = useLanguage()
+  
   const handleProductClick = () => {
     trackAnalyticsEvent('product_view', {
       productId: product.id,
     })
   }
+
+  const productName = getTranslatedName(product, language)
 
   return (
     <Link
@@ -148,7 +155,7 @@ function ProductCard({ product }: { product: Product }) {
         {product.image_url ? (
           <Image
             src={product.image_url}
-            alt={product.name_ar}
+            alt={productName}
             fill
             className="object-cover"
           />
@@ -162,7 +169,7 @@ function ProductCard({ product }: { product: Product }) {
       </div>
 
       <div className="p-4">
-        <h3 className="text-lg font-bold mb-2 line-clamp-2">{product.name_ar}</h3>
+        <h3 className="text-lg font-bold mb-2 line-clamp-2">{productName}</h3>
         
         {product.description && (
           <p className="text-gray-600 text-sm mb-3 line-clamp-2">
@@ -172,7 +179,9 @@ function ProductCard({ product }: { product: Product }) {
 
         {product.has_variants ? (
           <div className="flex items-center justify-between">
-            <span className="text-primary font-semibold">اضغط للاختيار</span>
+            <span className="text-primary font-semibold">
+              {language === 'fr' ? 'Cliquez pour choisir' : 'اضغط للاختيار'}
+            </span>
             <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
@@ -180,12 +189,12 @@ function ProductCard({ product }: { product: Product }) {
         ) : (
           <div className="flex items-center justify-between">
             <span className="text-2xl font-bold text-primary">
-              {product.price?.toFixed(2)} دج
+              {product.price?.toFixed(2)} {language === 'fr' ? 'DA' : 'دج'}
             </span>
             {product.stock_quantity !== null && product.stock_quantity > 0 ? (
-              <span className="text-sm text-secondary">متوفر</span>
+              <span className="text-sm text-secondary">{t('product.in_stock', 'متوفر')}</span>
             ) : (
-              <span className="text-sm text-red-500">غير متوفر</span>
+              <span className="text-sm text-red-500">{t('product.out_of_stock', 'غير متوفر')}</span>
             )}
           </div>
         )}
