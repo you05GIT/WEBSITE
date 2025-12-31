@@ -9,6 +9,22 @@ interface HomePageTranslation {
   ctaText: string
 }
 
+// Simple static translations for homepage
+const homePageContent: Record<'ar' | 'fr', HomePageTranslation> = {
+  ar: {
+    heroTitle: 'مرحبا بكم في متجر الجملة',
+    heroSubtitle: 'نبيع إكسسوارات الهواتف بالجملة',
+    heroDescription: 'نحن متخصصون في بيع جميع أنواع إكسسوارات الهواتف بأسعار الجملة في جميع ولايات الجزائر',
+    ctaText: 'تسوق الآن',
+  },
+  fr: {
+    heroTitle: 'Bienvenue dans notre magasin de gros',
+    heroSubtitle: 'Nous vendons des accessoires de téléphone en gros',
+    heroDescription: 'Nous sommes spécialisés dans la vente de tous types d\'accessoires de téléphone à des prix de gros dans toutes les wilayas d\'Algérie',
+    ctaText: 'Acheter maintenant',
+  }
+}
+
 export function useHomePageTranslations() {
   const { language } = useLanguage()
   const [content, setContent] = useState<HomePageTranslation | null>(null)
@@ -21,38 +37,27 @@ export function useHomePageTranslations() {
   const loadContent = async () => {
     setLoading(true)
     try {
-      // Try to get translation for current language
-      const { data: translation } = await supabase
-        .from('home_page_translations')
+      // Try to get editable content from database first (Arabic only for backward compatibility)
+      const { data: dbContent } = await supabase
+        .from('home_page_content')
         .select('*')
-        .eq('language_code', language)
         .single()
 
-      if (translation) {
+      if (dbContent && language === 'ar') {
+        // Use database content for Arabic
         setContent({
-          heroTitle: translation.hero_title,
-          heroSubtitle: translation.hero_subtitle,
-          heroDescription: translation.hero_description,
-          ctaText: translation.cta_text,
+          heroTitle: dbContent.hero_title,
+          heroSubtitle: dbContent.hero_subtitle,
+          heroDescription: dbContent.hero_description,
+          ctaText: dbContent.cta_text,
         })
       } else {
-        // Fallback to original home_page_content (Arabic)
-        const { data: fallback } = await supabase
-          .from('home_page_content')
-          .select('*')
-          .single()
-
-        if (fallback) {
-          setContent({
-            heroTitle: fallback.hero_title,
-            heroSubtitle: fallback.hero_subtitle,
-            heroDescription: fallback.hero_description,
-            ctaText: fallback.cta_text,
-          })
-        }
+        // Use static translations
+        setContent(homePageContent[language])
       }
     } catch (error) {
-      console.error('Error loading home page translations:', error)
+      // Fallback to static translations on error
+      setContent(homePageContent[language])
     } finally {
       setLoading(false)
     }
@@ -61,117 +66,6 @@ export function useHomePageTranslations() {
   return { content, loading }
 }
 
-interface ProductTranslation {
-  id: string
-  name: string
-  description: string | null
-}
-
-export function useProductTranslations(productId: string) {
-  const { language } = useLanguage()
-  const [product, setProduct] = useState<ProductTranslation | null>(null)
-
-  useEffect(() => {
-    if (productId) {
-      loadProduct()
-    }
-  }, [productId, language])
-
-  const loadProduct = async () => {
-    try {
-      // Try to get translation
-      const { data: translation } = await supabase
-        .from('product_translations')
-        .select('name, description')
-        .eq('product_id', productId)
-        .eq('language_code', language)
-        .single()
-
-      if (translation) {
-        setProduct({
-          id: productId,
-          name: translation.name,
-          description: translation.description,
-        })
-      } else {
-        // Fallback to original product data
-        const { data: fallback } = await supabase
-          .from('products')
-          .select('id, name_ar, description')
-          .eq('id', productId)
-          .single()
-
-        if (fallback) {
-          setProduct({
-            id: fallback.id,
-            name: fallback.name_ar,
-            description: fallback.description,
-          })
-        }
-      }
-    } catch (error) {
-      console.error('Error loading product translation:', error)
-    }
-  }
-
-  return product
-}
-
-interface CategoryTranslation {
-  id: string
-  name: string
-  description: string | null
-}
-
-export function useCategoryTranslations(categoryId: string) {
-  const { language } = useLanguage()
-  const [category, setCategory] = useState<CategoryTranslation | null>(null)
-
-  useEffect(() => {
-    if (categoryId) {
-      loadCategory()
-    }
-  }, [categoryId, language])
-
-  const loadCategory = async () => {
-    try {
-      // Try to get translation
-      const { data: translation } = await supabase
-        .from('category_translations')
-        .select('name, description')
-        .eq('category_id', categoryId)
-        .eq('language_code', language)
-        .single()
-
-      if (translation) {
-        setCategory({
-          id: categoryId,
-          name: translation.name,
-          description: translation.description,
-        })
-      } else {
-        // Fallback to original category data
-        const { data: fallback } = await supabase
-          .from('categories')
-          .select('id, name_ar, description')
-          .eq('id', categoryId)
-          .single()
-
-        if (fallback) {
-          setCategory({
-            id: fallback.id,
-            name: fallback.name_ar,
-            description: fallback.description,
-          })
-        }
-      }
-    } catch (error) {
-      console.error('Error loading category translation:', error)
-    }
-  }
-
-  return category
-}
 
 // Helper function to get translated name from product/category object
 export function getTranslatedName(
