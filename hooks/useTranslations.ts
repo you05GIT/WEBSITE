@@ -175,7 +175,7 @@ export function useCategoryTranslations(categoryId: string) {
 
 // Helper function to get translated name from product/category object
 export function getTranslatedName(
-  item: { name_ar?: string; name_fr?: string | null } | null,
+  item: { name_ar: string; name_fr?: string | null } | null,
   language: 'ar' | 'fr'
 ): string {
   if (!item) return ''
