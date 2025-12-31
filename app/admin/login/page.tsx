@@ -24,15 +24,20 @@ export default function AdminLoginPage() {
       if (error) throw error
 
       // Check if user is admin
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
         .select('role')
         .eq('id', data.user.id)
         .single()
 
-      if (profile?.role !== 'admin') {
+      if (profileError) {
         await supabase.auth.signOut()
-        throw new Error('غير مصرح لك بالدخول')
+        throw new Error('لم يتم العثور على ملف تعريف المستخدم. يرجى الاتصال بمسؤول النظام.')
+      }
+
+      if (!profile || profile.role !== 'admin') {
+        await supabase.auth.signOut()
+        throw new Error('غير مصرح لك بالدخول - حساب المشرف فقط')
       }
 
       toast.success('تم تسجيل الدخول بنجاح')

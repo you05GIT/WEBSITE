@@ -1,35 +1,49 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
+  // Skip auth check for login page
+  const isLoginPage = pathname === '/admin/login'
+
   useEffect(() => {
-    checkAdmin()
-  }, [])
+    if (!isLoginPage) {
+      checkAdmin()
+    } else {
+      setLoading(false)
+    }
+  }, [isLoginPage, pathname])
 
   const checkAdmin = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-    if (!user) {
+    if (userError || !user) {
       router.push('/admin/login')
       return
     }
 
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
       .select('role')
       .eq('id', user.id)
       .single()
 
-    if (profile?.role !== 'admin') {
+    if (profileError) {
+      toast.error('خطأ في التحقق من صلاحيات المستخدم')
+      router.push('/admin/login')
+      return
+    }
+
+    if (!profile || profile.role !== 'admin') {
       toast.error('غير مصرح لك بالدخول')
       router.push('/')
       return
@@ -42,6 +56,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/admin/login')
+  }
+
+  // Render login page without admin layout
+  if (isLoginPage) {
+    return <>{children}</>
   }
 
   if (loading) {
